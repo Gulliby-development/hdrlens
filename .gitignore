@@ -1,0 +1,8 @@
+.baked/
+*.db
+bin/
+*.exe
+*.test
+*.out
+
+/hdrlens
