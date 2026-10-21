@@ -45,6 +45,8 @@ usage: hdrlens check FILE
 
 `FILE` names a UTF-8 text file of header fields; `-` reads the same format from standard input. A single leading UTF-8 byte-order mark is accepted. Header names are case-insensitive for command processing. Dates use the HTTP-date form shown in the examples, for example `Sun, 06 Nov 1994 08:49:37 GMT`.
 
+Every date, in a field line or a `--now DATE` argument, is also read in the two obsolete forms that HTTP recipients must accept: RFC 850, such as `Sunday, 06-Nov-94 08:49:37 GMT` (with the full weekday name; two-digit years `70`–`99` mean 1970–1999 and `00`–`69` mean 2000–2069), and asctime, such as `Sun Nov  6 08:49:37 1994` (with no zone and a two-character day, space-padded for single-digit days). All three forms require a weekday matching the date, and the program always prints dates in the fixed `Sun, 06 Nov 1994 08:49:37 GMT` form.
+
 ## Commands
 
 - **`check FILE`** validates the header fields. On valid input it prints the field count and distinct, repeated, and longest-value statistics. If a field line is malformed, it prints the first problem and a problem count.

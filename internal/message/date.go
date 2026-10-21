@@ -7,12 +7,23 @@ import (
 )
 
 var weekdayNames = [...]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
+var fullWeekdayNames = [...]string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
 var monthNames = [...]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 const secondsPerDay int64 = 24 * 60 * 60
 
-// ParseDate parses the exact English HTTP-date form used by hdrlens.
+// ParseDate parses the fixed, RFC 850, or asctime English HTTP-date form.
 func ParseDate(text string) (int64, bool) {
+	if sec, ok := parseFixedDate(text); ok {
+		return sec, true
+	}
+	if sec, ok := parseRFC850Date(text); ok {
+		return sec, true
+	}
+	return parseAsctimeDate(text)
+}
+
+func parseFixedDate(text string) (int64, bool) {
 	if len(text) != 29 ||
 		text[3] != ',' || text[4] != ' ' || text[7] != ' ' ||
 		text[11] != ' ' || text[16] != ' ' ||
@@ -28,8 +39,82 @@ func ParseDate(text string) (int64, bool) {
 	hour, hourOK := parseTwoDigits(text[17:19])
 	minute, minuteOK := parseTwoDigits(text[20:22])
 	second, secondOK := parseTwoDigits(text[23:25])
-	if weekday < 0 || month < 0 || !dayOK || !yearOK ||
-		!hourOK || !minuteOK || !secondOK ||
+	if !dayOK || !yearOK || !hourOK || !minuteOK || !secondOK {
+		return 0, false
+	}
+	return checkedDate(weekday, day, month, year, hour, minute, second)
+}
+
+func parseRFC850Date(text string) (int64, bool) {
+	comma := strings.IndexByte(text, ',')
+	if comma < 0 || comma+2 > len(text) {
+		return 0, false
+	}
+	weekday := nameIndex(text[:comma], fullWeekdayNames[:])
+	if weekday < 0 {
+		return 0, false
+	}
+	start := comma + 2
+	if len(text) != start+22 ||
+		text[comma+1] != ' ' ||
+		text[start+2] != '-' || text[start+6] != '-' ||
+		text[start+9] != ' ' || text[start+18] != ' ' ||
+		text[start+19:] != "GMT" ||
+		text[start+12] != ':' || text[start+15] != ':' {
+		return 0, false
+	}
+
+	day, dayOK := parseTwoDigits(text[start : start+2])
+	month := nameIndex(text[start+3:start+6], monthNames[:])
+	shortYear, yearOK := parseTwoDigits(text[start+7 : start+9])
+	hour, hourOK := parseTwoDigits(text[start+10 : start+12])
+	minute, minuteOK := parseTwoDigits(text[start+13 : start+15])
+	second, secondOK := parseTwoDigits(text[start+16 : start+18])
+	if !dayOK || !yearOK || !hourOK || !minuteOK || !secondOK {
+		return 0, false
+	}
+	year := 2000 + shortYear
+	if shortYear >= 70 {
+		year = 1900 + shortYear
+	}
+	return checkedDate(weekday, day, month, year, hour, minute, second)
+}
+
+func parseAsctimeDate(text string) (int64, bool) {
+	if len(text) != 24 ||
+		text[3] != ' ' || text[7] != ' ' ||
+		text[10] != ' ' || text[13] != ':' || text[16] != ':' ||
+		text[19] != ' ' {
+		return 0, false
+	}
+
+	weekday := nameIndex(text[0:3], weekdayNames[:])
+	month := nameIndex(text[4:7], monthNames[:])
+	day := 0
+	if text[8] == ' ' {
+		if !asciiDigit(text[9]) || text[9] == '0' {
+			return 0, false
+		}
+		day = int(text[9] - '0')
+	} else {
+		var dayOK bool
+		day, dayOK = parseTwoDigits(text[8:10])
+		if !dayOK || day < 10 {
+			return 0, false
+		}
+	}
+	hour, hourOK := parseTwoDigits(text[11:13])
+	minute, minuteOK := parseTwoDigits(text[14:16])
+	second, secondOK := parseTwoDigits(text[17:19])
+	year, yearOK := parseFourDigits(text[20:24])
+	if !hourOK || !minuteOK || !secondOK || !yearOK {
+		return 0, false
+	}
+	return checkedDate(weekday, day, month, year, hour, minute, second)
+}
+
+func checkedDate(weekday, day, month, year, hour, minute, second int) (int64, bool) {
+	if weekday < 0 || month < 0 ||
 		year < 1970 || year > 2999 || day < 1 ||
 		hour > 23 || minute > 59 || second > 59 {
 		return 0, false
