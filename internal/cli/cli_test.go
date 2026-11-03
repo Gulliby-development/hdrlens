@@ -109,7 +109,7 @@ func TestUsageAndHelp(t *testing.T) {
 		t.Fatal("Run is nil")
 	}
 	want := "usage: hdrlens check FILE\n" +
-		"       hdrlens list FILE [--by-name]\n" +
+		"       hdrlens list FILE [--by-name] [--name NAME]\n" +
 		"       hdrlens accept FILE OFFER...\n" +
 		"       hdrlens range FILE LENGTH\n" +
 		"       hdrlens cache FILE --now DATE [--shared]\n" +

@@ -16,7 +16,7 @@ func TestExportedAPI(t *testing.T) {
 	if CheckUsage != "hdrlens check FILE" {
 		t.Fatalf("CheckUsage = %q", CheckUsage)
 	}
-	if ListUsage != "hdrlens list FILE [--by-name]" {
+	if ListUsage != "hdrlens list FILE [--by-name] [--name NAME]" {
 		t.Fatalf("ListUsage = %q", ListUsage)
 	}
 }

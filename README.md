@@ -36,7 +36,7 @@ The resulting executable is standalone. Keep it in the current directory or put 
 
 ```text
 usage: hdrlens check FILE
-       hdrlens list FILE [--by-name]
+       hdrlens list FILE [--by-name] [--name NAME]
        hdrlens accept FILE OFFER...
        hdrlens range FILE LENGTH
        hdrlens cache FILE --now DATE [--shared]
@@ -50,7 +50,7 @@ Every date, in a field line or a `--now DATE` argument, is also read in the two 
 ## Commands
 
 - **`check FILE`** validates the header fields. On valid input it prints the field count and distinct, repeated, and longest-value statistics. If a field line is malformed, it prints the first problem and a problem count.
-- **`list FILE [--by-name]`** prints a table of line number, field name, and value in file order. `--by-name` sorts by lower-case field name, then by line number.
+- **`list FILE [--by-name] [--name NAME]`** prints a table of line number, field name, and value in file order. `--by-name` sorts by lower-case field name, then by line number. `--name NAME` keeps only the fields whose name equals `NAME` ignoring ASCII case, and prints just the table header when none does; an empty `NAME` is an error.
 - **`accept FILE OFFER...`** compares each offered `TYPE/SUB` media type with the file's `Accept` fields and prints its quality and deciding range, followed by the selected offer. If there is no `Accept` field, all offers have quality 1. The first offer wins a tie; no positively rated offer is a negative result.
 - **`range FILE LENGTH`** resolves any `Range` fields against a non-negative resource length. It reports status 200 for the full resource, 206 and the merged byte spans for a partial result, or 416 when no requested span is satisfiable.
 - **`cache FILE --now DATE [--shared]`** evaluates cache directives and date fields at the supplied time. It reports whether the response is fresh, stale, requires revalidation, or is uncacheable. `--shared` applies shared-cache rules, including `s-maxage`.
@@ -106,6 +106,7 @@ Other command forms are shown in the usage block above. For instance, cache and 
 | Option | Used by | Description |
 |---|---|---|
 | `--by-name` | `list` | Sort by lower-case field name, then by line. |
+| `--name NAME` | `list` | Show only the fields called `NAME` (ASCII case-insensitive). |
 | `--now DATE` | `cache`, `cookie` | The current time, an HTTP date such as `Sun, 06 Nov 1994 08:49:37 GMT` (required). |
 | `--shared` | `cache` | Evaluate as a shared cache (`s-maxage`, `private`). |
 | `--send URL` | `cookie` | Also list the stored cookies a request to `URL` would send. |

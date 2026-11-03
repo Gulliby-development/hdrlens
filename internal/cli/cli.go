@@ -13,7 +13,7 @@ import (
 
 // Usage is the help text for the hdrlens commands.
 const Usage = "usage: hdrlens check FILE\n" +
-	"       hdrlens list FILE [--by-name]\n" +
+	"       hdrlens list FILE [--by-name] [--name NAME]\n" +
 	"       hdrlens accept FILE OFFER...\n" +
 	"       hdrlens range FILE LENGTH\n" +
 	"       hdrlens cache FILE --now DATE [--shared]\n" +

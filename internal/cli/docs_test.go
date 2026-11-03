@@ -28,7 +28,7 @@ func TestReadmeDocumentsContract(t *testing.T) {
 		{name: "cache usage", want: "       hdrlens cache FILE --now DATE [--shared]"},
 		{name: "cookie usage", want: "       hdrlens cookie FILE URL --now DATE [--send URL]"},
 		{name: "full help block", want: `usage: hdrlens check FILE
-       hdrlens list FILE [--by-name]
+       hdrlens list FILE [--by-name] [--name NAME]
        hdrlens accept FILE OFFER...
        hdrlens range FILE LENGTH
        hdrlens cache FILE --now DATE [--shared]
