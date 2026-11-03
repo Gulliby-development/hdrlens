@@ -9,11 +9,12 @@ import (
 	"github.com/Gulliby-development/hdrlens/internal/message"
 )
 
-const ListUsage = "hdrlens list FILE [--by-name]"
+const ListUsage = "hdrlens list FILE [--by-name] [--name NAME]"
 
-// RunList prints the header fields in source order or sorted by name.
+// RunList prints the header fields in source order or sorted by name, all of
+// them or only those called NAME.
 func RunList(args []string, io base.IO) (int, error) {
-	parsed, err := base.Parse(args, []base.Spec{{Name: "--by-name"}})
+	parsed, err := base.Parse(args, []base.Spec{{Name: "--by-name"}, {Name: "--name", Takes: true}})
 	if err != nil {
 		return 0, err
 	}
@@ -23,6 +24,11 @@ func RunList(args []string, io base.IO) (int, error) {
 	if len(parsed.Args) > 1 {
 		return 0, errors.New("too many arguments")
 	}
+	name, filtered := parsed.Values["--name"]
+	if filtered && name == "" {
+		return 0, errors.New("invalid --name value " + base.Show(name))
+	}
+	name = strings.ToLower(name)
 
 	loaded, err := message.Load(io, parsed.Args[0])
 	if err != nil {
@@ -37,6 +43,9 @@ func RunList(args []string, io base.IO) (int, error) {
 
 	rows := make([][]string, 0, len(fields))
 	for _, field := range fields {
+		if filtered && strings.ToLower(field.Name) != name {
+			continue
+		}
 		rows = append(rows, []string{
 			strconv.Itoa(field.Line),
 			field.Name,
